@@ -1,0 +1,21 @@
+*{
+    margin:0;
+}
+header{
+    border:1px solid black;
+}
+nav{
+    border: 1px solid green;
+}
+section{
+    margin-left : 20%;
+    border: 1px solid blue;
+}
+aside{
+    width:20%;
+    float: left;
+    border: 1px solid purple;
+}
+footer{
+    border: 3px solid pink;
+}
