@@ -3,13 +3,32 @@
 }
 header{
     border:1px solid black;
+    font-size:90px;
+    text-align:center;
 }
 nav{
     border: 1px solid green;
 }
+nav div {
+    text-align:center;
+}
+nav div p{
+    display: inline-block;
+    font-size:40px;
+    border: 1px solid green;
+    text-align: center;
+}
+
 section{
     margin-left : 20%;
     border: 1px solid blue;
+}
+section div{
+    display: inline-block;
+    overflow: hidden;
+    width:200px;
+    height:200px;
+    border:1px solid black;
 }
 aside{
     width:20%;
