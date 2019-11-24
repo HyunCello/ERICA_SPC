@@ -1,9 +1,14 @@
 *{
     margin:0;
 }
+body >div{
+    width : 80%;
+    margin-right : 10%;
+    margin-left : 10%;
+}
 header{
     border:1px solid black;
-    font-size:90px;
+    font-size:50px;
     text-align:center;
 }
 nav{
