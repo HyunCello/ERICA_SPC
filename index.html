@@ -6,6 +6,58 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="style/main.css">
     <title>SPC</title>
+    <style>
+        body{ 
+            font-family: "Lato", sans-serif;
+        }
+        
+        .topnav{  /*화면메뉴상태*/
+            height: 0%;
+            width: 100%;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #223;
+            overflow-x: hidden;
+            transition: 0.2s;
+        }
+        
+        .topnav > a{ /*topnav 내의 아이템들 설정*/
+            margin: 0 auto;
+            padding: 8px 8px 8px 15px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+        
+        .topnav a:hover{
+            color: #f1f1f1;
+        }
+        
+        .topnav .closebtn{
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+        
+        @media screen and (max-height: 450px){
+            .topnav {padding-top: 15px;}
+            .topnav a {font-size: 18px;}
+        }
+        </style>
+        <script> /* 버튼 클릭 시 작동*/
+            function openNav(){  /*style의 크기를 30%로 변경*/
+                document.getElementById("myTopnav").style.height = "30%";
+            }
+            function closeNav(){ /*style의 크기를 0으로 변경*/
+                document.getElementById("myTopnav").style.height = "0";
+            }
+        </script>
 </head>
 <body>
     <div>
@@ -14,74 +66,56 @@
                 SPC : 정치 공약 모음
             </p>
         </header>
-
-        <nav>
-            <div>
-                <p>
-                    지역별
-                </p>
-                <p>
-                    정당별
-                </p>
-                <p>
-                    비교분석
-                </p>
-                <p>
-                    더보기
-                </p>
-
-            </div>        
-        </nav>
-        <aside>
-                <p>
-                    aside
-                </p>
-                <li>
-                    메인 메뉴
-                </li>
-                <li>
-                    정당 분류
-                </li>
-                <li>
-                    연도별 분류
-                </li>
-                <li>
-                    인물별 분류
-                </li>
-                <li>
-                    분야별 분류
-                </li>
-            </aside>
+        <div id="myTopnav" class="topnav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">
+                &times; <!--close 버튼-->
+            </a>
+            <a href="https://naver.com">
+                메인 화면
+            </a>
+            <a href="ex">
+                정당별 공약 분류
+            </a>
+            <a href="https://naver.com">
+                분야별 공약 분류
+            </a>
+            <a href="#">
+                인물별 공약 분류
+            </a>
+        </div>
+        <span style="font-size:30px;cursor:pointer" onclick="openNav()">
+            &#9776; Menu <!--open 버튼-->
+        </span>
         <article>
             <section>
                 <div>
                     <p>
-                    section
+                        section
                     </p>
                 </div>
                 <div>
                     <p>
-                    section
+                        section
                     </p>
                 </div>
                 <div>
                     <p>
-                    section
+                        section
                     </p>
                 </div>
                 <div>
                     <p>
-                    section
+                        section
                     </p>
                 </div>
                 <div>
                     <p>
-                    section
+                        section
                     </p>
                 </div>
                 <div>
                     <p>
-                    section
+                        section
                     </p>
                 </div>
                 
@@ -98,7 +132,7 @@
         </footer>
 
     </div>
-   
+
 
 </body>
 </html>
