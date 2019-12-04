@@ -6,60 +6,16 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="style/main.css">
     <title>SPC</title>
-    <style>
-        body{ 
-            font-family: "Lato", sans-serif;
-        }
-        
-        .topnav{  /*화면메뉴상태*/
-            height: 0%;
-            width: 100%;
-            position: fixed;
-            z-index: 1;
-            top: 0;
-            left: 0;
-            background-color: #223;
-            overflow-x: hidden;
-            transition: 0.2s;
-        }
-        
-        .topnav > a{ /*topnav 내의 아이템들 설정*/
-            margin: 0 auto;
-            padding: 8px 8px 8px 15px;
-            text-decoration: none;
-            font-size: 25px;
-            color: #818181;
-            display: block;
-            transition: 0.3s;
-        }
-        
-        .topnav a:hover{
-            color: #f1f1f1;
-        }
-        
-        .topnav .closebtn{
-            position: absolute;
-            top: 0;
-            right: 25px;
-            font-size: 36px;
-            margin-left: 50px;
-        }
-        
-        @media screen and (max-height: 450px){
-            .topnav {padding-top: 15px;}
-            .topnav a {font-size: 18px;}
-        }
-        </style>
-        <script> /* 버튼 클릭 시 작동*/
-            function openNav(){  /*style의 크기를 30%로 변경*/
-                document.getElementById("myTopnav").style.height = "30%";
-            }
-            function closeNav(){ /*style의 크기를 0으로 변경*/
-                document.getElementById("myTopnav").style.height = "0";
-            }
-        </script>
 </head>
 <body>
+    <script> /* 버튼 클릭 시 작동*/
+        function openNav(){  /*style의 크기를 30%로 변경*/
+            document.getElementById("myTopnav").style.height = "30%";
+        }
+        function closeNav(){ /*style의 크기를 0으로 변경*/
+            document.getElementById("myTopnav").style.height = "0";
+        }
+    </script>
     <div>
          <header>
             <p>
