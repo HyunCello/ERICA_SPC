@@ -10,8 +10,10 @@
 </head>
 <body>
     <div>
+    
          <header>
             <p>
+
                 SPC : 정치 공약 모음
             </p>
         </header>
@@ -19,7 +21,10 @@
         <nav>
             <div>
                 <p>
-                   정치 공약들을 정리해서 보여드립니다.
+                <?php
+            print "Hello, PHP!";
+            ?>
+                정치 공약들을 정리해서 보여드립니다.
                 </p>
 
             </div>        

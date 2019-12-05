@@ -1,0 +1,3238 @@
+중앙선거관리위원회_팝업
+
+
+
+
+
+
+
+
+
+			//미리보기/다운로드 팝업
+			function fnPop(fileNm) {
+				var url = "/popup.jsp?fn="+fileNm;
+				var pop = window.open(url, 'download', 'height=220,width=210,menubar=no,directories=no,resizable=yes,status=no,scrollbars=no');
+				pop.focus();
+			}
+
+			// 미리보기
+			function fnPreview(fileNm) {
+				var url = "/preview.jsp?fn="+fileNm+"&abs=true";
+				var pop = window.open(url, 'preview', 'menubar=no,directories=no,resizable=yes,status=no,scrollbars=no');
+				pop.focus();
+			}
+		
+
+
+
+Skip Navigation
+
+본문 바로가기
+주메뉴 바로가기
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//선거구 페이지 이동
+	function fnGopage(sungerCode, isContents) {
+		if(isContents){
+			$("#page").val('');
+			$('#sungerCode').val('');
+			$('#cityCode').val('');
+			$('#guCode').val('');
+			$('#lastCode').val('');
+			$('#searchStr').val(''); 
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyContent"+sungerCode+".do");
+		} else {
+			$("#page").val(1);
+			$('#sungerCode').val(sungerCode);
+			$('#cityCode').val('');
+			$('#guCode').val('');
+			$('#lastCode').val('');
+			$('#searchStr').val(''); 
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyList.do");
+		}
+		$("#searchPolicyVO").submit();
+	}
+	
+	function fnSearch() {
+		$("#page").val(1); 
+
+		// 지역별 후보 보기
+		if($('#sungerCode').val()== 12){
+			if($("citySelect").val() == ''){
+				alert("시,도 를 선택해주세요.");
+				return false;
+			} else if($("#guSelect").val() == ''){
+				alert("시,군,구 를 선택해주세요.");
+				return false;
+			} else if($("#lastSelect").val() == ''){
+				alert("읍,면,동 을 선택해주세요.");
+				return false;
+			}
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyLocalList.do");	
+		}else{
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyList.do");
+		}
+		$("#searchPolicyVO").submit();	
+	}
+	
+	//select box 초기 세팅
+	$( document ).ready(function() {
+		// 시,도 를 출력하는 select box 생성
+		$('#searchSelect').html("<select id='citySelect' name='citySelect' onchange='fnSidoChange(true)'><option value=''>전체</option></select>");
+		
+		// 선거구 항목들을 가져온다
+		var sendUrl = "/svc/sungergu/GetCode.do";
+		
+		// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+		if($('#sungerCode').val()=='12'){
+			sendUrl = "/svc/policyLocal/getLocal.do";
+		}
+		
+		var code = '04';
+		if($('#sungerCode').val()=='02' || $('#sungerCode').val()=='10' || $('#sungerCode').val()=='11' || $('#sungerCode').val()=='03' || $('#sungerCode').val()=='22' || $('#sungerCode').val()=='25' || $('#sungerCode').val()=='26' || $('#sungerCode').val()=='12') {
+			code = $('#sungerCode').val();
+		} else if($('#sungerCode').val()=='30'){
+			code = '30';
+		}
+		
+		//후보자공약 메뉴
+		if($('#sungerCode').val()=='22'){ 
+			// 후보자공약-국회의원 재보궐선거
+			var param = {"type" : "0","code":code};
+		}else if($('#sungerCode').val()=='26'){ 
+			// 후보자공약-구시군의원 재보궐선거
+			var param = {"type" : "0","code":code};
+		}else{
+			//나머지
+			var param = {"type" : "1","code":code};
+		} 
+
+		fnAjaxJsonSubmit(sendUrl, param, function(data){
+			$('#citySelect option[value!=""]').remove();
+			var arrCode = data["code"];
+			
+			// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+			if($('#sungerCode').val()=='12'){				
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($("#cityCode").val() == obj["sd_id"]){
+							$('#citySelect').append('<option value="'+obj["sd_id"]+'" selected>'+obj["sd_name"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sd_id"]+'">'+obj["sd_name"]+'</option>');
+						}
+					}
+				}
+			} else if($('#sungerCode').val()=='30'){ // 지방선거 후보자 공약에서 교육의원은 제주도만 남기고 삭제해달라는 요청.				
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($('#cityCode').val() == obj["sggid"]) {
+							$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+						}
+					}
+				}
+			} else if($('#sungerCode').val()=='04' || $('#sungerCode').val()=='24' || $('#sungerCode').val()=='26' ){ // 지방선거 후보자 공약 구시군의장 후보자 공약에서 세종시와 제주도는 필요 없음. 			
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if(obj["sggname"] != "제주특별자치도" && obj["sggname"] != "세종특별자치시"){
+							if($('#cityCode').val() == obj["sggid"]) {
+								$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}
+					}
+				}
+			} else {
+				if(arrCode) { 
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($('#cityCode').val() == obj["sggid"]) {
+							$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+						}
+					}
+				} 
+			}
+
+			if($('#sungerCode').val()=='02' ||  $('#sungerCode').val()=='04' || $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='22' ||   $('#sungerCode').val()=='24' ||  $('#sungerCode').val()=='25' || $('#sungerCode').val()=='26' ) {
+				fnSidoChange(false);	
+			} 
+		});
+		
+	});
+	
+	//ajax 요청
+	function fnAjaxJsonSubmit(sendUrl, param, callFun) {
+		$.ajax({
+		    type : "POST" 
+		    , async : true 
+		    , url : sendUrl 
+		    , dataType : "json" 
+		    , timeout : 30000 
+		    , cache : false  
+		    , data : param 
+		    , contentType: "application/x-www-form-urlencoded; charset=UTF-8"
+		    , error : function(request, status, error) {
+		     	alert("code : " + request.status + "\r\nmessage : " + request.reponseText);
+		    }
+		    , success : function(data) {
+		    	callFun(data);
+		    }
+		    , beforeSend: function() {
+		    }
+		    , complete: function() {
+		    }
+		});
+	}
+	
+	//시도 변경시 
+	function fnSidoChange(isAjax){
+		// 국회의원(02), 구시원의장(04), 우리 동네 후보자 찾기(12)
+		$('#cityCode').val($('#citySelect').val());		
+		if(isAjax){
+			$('#guCode').val('');
+			$('#lastCode').val('');
+		}
+		
+		// 해당 선거코드 일때  시,군,구 선택하는 select box 생성
+		if($('#sungerCode').val()=='02' || $('#sungerCode').val()=='04' || $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06' || $('#sungerCode').val()=='12' ||   $('#sungerCode').val()=='24' || $('#sungerCode').val()=='25' ) {
+			$('#searchSelect2').html("<select id='guSelect' name='guSelect' onchange='fnGuChange(true)'><option value=''>전체</option></select>");
+		
+			if($('#citySelect').val()=='') {
+				if($('#sungerCode').val()=='05' || $('#sungerCode').val()=='06' || $('#sungerCode').val()=='12'|| $('#sungerCode').val()=='25'){
+					$('#searchSelect3').html("<select id='lastSelect' name='lastSelect' onchange='fnLastChange()'><option value=''>전체</option></select>");
+				}
+				return;
+			}
+			var sendUrl = "/svc/sungergu/GetCode.do";
+			
+			// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+			if($('#sungerCode').val()=='12'){
+				sendUrl = "/svc/policyLocal/getLocal.do";
+			}
+			
+			var param = {"type" : "2","code":$('#citySelect').val()};
+			
+			if($('#sungerCode').val()=='02'){
+				param = {"type" : "7","code":$('#citySelect').val()};
+			}else if($('#sungerCode').val()=='22'){
+				param = {"type" : "8","code":$('#citySelect').val()};
+			}else if($('#sungerCode').val()=='04'){
+				//param = {"type" : "2","code":$('#citySelect').val()};
+				param = {"type" : "11","code":$('#citySelect').val(), "sgCode":$('#sungerCode').val()};
+			}else if($('#sungerCode').val()=='24'){
+				param = {"type" : "11","code":$('#citySelect').val(), "sgCode":$('#sungerCode').val()};
+			}
+
+			fnAjaxJsonSubmit(sendUrl, param, function(data){
+				$('#guSelect option[value!=""]').remove();
+				var arrCode = data["code"];
+				
+				// 우리 동네 후보자 찾기 별도 출력
+				if($('#sungerCode').val()=='12'){		
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#guCode').val() == obj["gsg_id"]){
+								$('#guSelect').append('<option value="'+obj["gsg_id"]+'" selected>'+obj["gsg_name"]+'</option>');
+							} else { 
+								$('#guSelect').append('<option value="'+obj["gsg_id"]+'">'+obj["gsg_name"]+'</option>');
+							}
+						}			
+					}
+				} else {
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#guCode').val() == obj["sggid"]){
+								$('#guSelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#guSelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}			
+					}
+				}
+				if( $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='25' ) {
+					fnGuChange(isAjax);
+				} 
+			});
+		}
+	}
+	
+	//구 변경시 
+	function fnGuChange(isAjax){
+		$('#guCode').val($('#guSelect').val());	
+		if(isAjax) {
+			$('#lastCode').val('');
+		}
+		
+		if($('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='25' ){
+			$('#searchSelect3').html("<select id='lastSelect' name='lastSelect' onchange='fnLastChange()'><option value=''>전체</option></select>");	
+			if($('#guSelect').val()=='' ||  $('#citySelect').val() =='')
+				return;
+			var sendUrl = "/svc/sungergu/GetCode.do";
+			var param = {"type":type, "code":$('#citySelect').val()+'|'+$('#guSelect').val()};			
+			
+			var type = 3;
+			if($('#sungerCode').val()=='06'){
+				type = 4;
+			}else if($('#sungerCode').val()=='12'){
+				sendUrl = "/svc/policyLocal/getLocal.do";
+				type = 5;
+				var param = {"type":type, "code":$('#guSelect').val()};
+			}else if($('#sungerCode').val()=='25' || $('#sungerCode').val()=='26'){
+				sendUrl =  "/svc/sungergu/GetCode.do";
+				type = 3;
+				var param = {"type":type,  "code":$('#citySelect').val()+''+$('#guSelect').val(), "sgCode":$('#sungerCode').val()};
+			}
+							
+			fnAjaxJsonSubmit(sendUrl, param, function(data){
+				$('#lastSelect option[value!=""]').remove();
+				var arrCode = data["code"];				
+				
+				if($('#sungerCode').val()=='12'){		
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#lastCode').val() == obj["emd_id"]) {
+								$('#lastSelect').append('<option value="'+obj["emd_id"]+'" selected>'+obj["emd_name"]+'</option>');
+							} else { 
+								$('#lastSelect').append('<option value="'+obj["emd_id"]+'">'+obj["emd_name"]+'</option>');
+							}
+						}			
+					}
+				} else {
+					if(arrCode) {					
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#lastCode').val() == obj["sggid"]) {
+								$('#lastSelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#lastSelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}			
+					}
+				}
+			});
+		}
+	}
+	
+	//3뎁스 변경
+	function fnLastChange() {
+		$('#lastCode').val($('#lastSelect').val());
+	}
+	
+	
+
+
+		$(function() {
+			var gnbHr = $('#gnbWrap');
+			//gnbHr.find('>ul>li>ul').hide();
+			//gnbHr.find('>ul>li.on>ul').show();
+
+			gnbHr.find('>ul>li').mouseover(function(){ // 마우스를 올리면
+				$(this).addClass("on"); //active 클래스를 적용
+				gnbHr.find('>ul>li>.submenu').hide(); // 모든 서브메뉴 숨김
+				gnbHr.find('>ul>li.on>.submenu').show(); // active의 하위 서브메뉴 열림
+			})
+			gnbHr.find('>ul>li').mouseleave(function(){ // 마우스를 떼면
+				gnbHr.find('>ul>li.on').removeClass("on"); //기존 active 클래스 제거
+				gnbHr.find('>ul>li>.submenu').hide(); // 모든 서브메뉴 숨김
+				gnbHr.find('>ul>li.on>.submenu').show(); // 원래 열려있던 서브메뉴 열림
+			})
+		});
+	
+
+
+
+
+
+
+
+중앙선거관리위원회 홈페이지 바로가기
+
+메뉴열기
+
+
+지난 선거 공약
+
+
+대통령선거
+국회의원선거
+지방선거
+
+
+
+당선인공약
+
+
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+
+
+
+
+정책선거란?
+
+
+
+
+
+
+
+
+
+정당 정책ㆍ공약
+제19대 대통령 선거
+
+
+
+
+대통령 선거 선택: 
+
+제19대 대통령선거
+제18대 대통령선거
+제17대 대통령선거
+
+
+
+
+						function gotoPcontent() {
+							if ($("#selection option:selected").val()=="#")
+								alert("2012년 제18대 대통령선거에서는 정당의 정책ㆍ공약은 제출받지 않았습니다.");
+							else 
+								location.href = $("#selection option:selected").val();
+						}
+					
+
+
+
+
+
+
+더불어민주당 문재인
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+자유한국당 홍준표
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민의당 안철수
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+바른정당 유승민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+정의당 심상정
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+새누리당 조원진
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+경제애국당 오영국
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민대통합당 장성민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+늘푸른한국당 이재오
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+민중연합당 김선동
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+통일한국당 남재준
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한국국민당 이경희
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한반도미래연합 김정선
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+홍익당 윤홍식
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+
+
+※ 선거관리위원회는 2006년도 이후 임기만료 선거에서 매니페스토 정책선거 정착을 위해 정당의 정책·공약을 제출받아 공개하여 왔습니다.
+※ 다만, 2012년 제18대 대통령선거에서는 정당의 정책·공약은 제출받지 않았습니다.
+
+
+
+
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-51281666-1', 'nec.go.kr');
+  ga('send', 'pageview');
+
+
+
+
+			if(!wcs_add) var wcs_add = {}; wcs_add["wa"] = "75c21f31779ce0"; wcs_do();
+		
+
+
+
+개인정보처리방침
+저작권정책
+연락처
+찾아오시는길
+RSS
+홈페이지도우미
+
+
+
+
+[13809] 경기도 과천시 홍촌말로 44(중앙동 2-3) 중앙선거관리위원회
+대표전화 : 02-503-1114 선거법질의·신고제보 : 국번없이 1390
+중앙선거관리위원회_팝업
+
+
+
+
+
+
+
+
+
+			//미리보기/다운로드 팝업
+			function fnPop(fileNm) {
+				var url = "/popup.jsp?fn="+fileNm;
+				var pop = window.open(url, 'download', 'height=220,width=210,menubar=no,directories=no,resizable=yes,status=no,scrollbars=no');
+				pop.focus();
+			}
+
+			// 미리보기
+			function fnPreview(fileNm) {
+				var url = "/preview.jsp?fn="+fileNm+"&abs=true";
+				var pop = window.open(url, 'preview', 'menubar=no,directories=no,resizable=yes,status=no,scrollbars=no');
+				pop.focus();
+			}
+
+
+
+중앙선거관리위원회_팝업
+
+
+
+
+
+
+
+
+//미리보기/다운로드 팝업
+			function fnPop(fileNm) {
+				var url = "/popup.jsp?fn="+fileNm;
+				var pop = window.open(url, 'download', 'height=220,width=210,menubar=no,directories=no,resizable=yes,status=no,scrollbars=no');
+				pop.focus();
+			}
+
+			// 미리보기
+			function fnPreview(fileNm) {
+				var url = "/preview.jsp?fn="+fileNm+"&abs=true";
+				var pop = window.open(url, 'preview', 'menubar=no,directories=no,resizable=yes,status=no,scrollbars=no');
+				pop.focus();
+			}
+Skip Navigation
+
+본문 바로가기
+주메뉴 바로가기
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//선거구 페이지 이동
+	function fnGopage(sungerCode, isContents) {
+		if(isContents){
+			$("#page").val('');
+			$('#sungerCode').val('');
+			$('#cityCode').val('');
+			$('#guCode').val('');
+			$('#lastCode').val('');
+			$('#searchStr').val(''); 
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyContent"+sungerCode+".do");
+		} else {
+			$("#page").val(1);
+			$('#sungerCode').val(sungerCode);
+			$('#cityCode').val('');
+			$('#guCode').val('');
+			$('#lastCode').val('');
+			$('#searchStr').val(''); 
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyList.do");
+		}
+		$("#searchPolicyVO").submit();
+	}
+	
+	function fnSearch() {
+		$("#page").val(1); 
+
+		// 지역별 후보 보기
+		if($('#sungerCode').val()== 12){
+			if($("citySelect").val() == ''){
+				alert("시,도 를 선택해주세요.");
+				return false;
+			} else if($("#guSelect").val() == ''){
+				alert("시,군,구 를 선택해주세요.");
+				return false;
+			} else if($("#lastSelect").val() == ''){
+				alert("읍,면,동 을 선택해주세요.");
+				return false;
+			}
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyLocalList.do");	
+		}else{
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyList.do");
+		}
+		$("#searchPolicyVO").submit();	
+	}
+	
+	//select box 초기 세팅
+	$( document ).ready(function() {
+		// 시,도 를 출력하는 select box 생성
+		$('#searchSelect').html("<select id='citySelect' name='citySelect' onchange='fnSidoChange(true)'><option value=''>전체</option></select>");
+		
+		// 선거구 항목들을 가져온다
+		var sendUrl = "/svc/sungergu/GetCode.do";
+		
+		// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+		if($('#sungerCode').val()=='12'){
+			sendUrl = "/svc/policyLocal/getLocal.do";
+		}
+		
+		var code = '04';
+		if($('#sungerCode').val()=='02' || $('#sungerCode').val()=='10' || $('#sungerCode').val()=='11' || $('#sungerCode').val()=='03' || $('#sungerCode').val()=='22' || $('#sungerCode').val()=='25' || $('#sungerCode').val()=='26' || $('#sungerCode').val()=='12') {
+			code = $('#sungerCode').val();
+		} else if($('#sungerCode').val()=='30'){
+			code = '30';
+		}
+		
+		//후보자공약 메뉴
+		if($('#sungerCode').val()=='22'){ 
+			// 후보자공약-국회의원 재보궐선거
+			var param = {"type" : "0","code":code};
+		}else if($('#sungerCode').val()=='26'){ 
+			// 후보자공약-구시군의원 재보궐선거
+			var param = {"type" : "0","code":code};
+		}else{
+			//나머지
+			var param = {"type" : "1","code":code};
+		} 
+
+		fnAjaxJsonSubmit(sendUrl, param, function(data){
+			$('#citySelect option[value!=""]').remove();
+			var arrCode = data["code"];
+			
+			// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+			if($('#sungerCode').val()=='12'){				
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($("#cityCode").val() == obj["sd_id"]){
+							$('#citySelect').append('<option value="'+obj["sd_id"]+'" selected>'+obj["sd_name"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sd_id"]+'">'+obj["sd_name"]+'</option>');
+						}
+					}
+				}
+			} else if($('#sungerCode').val()=='30'){ // 지방선거 후보자 공약에서 교육의원은 제주도만 남기고 삭제해달라는 요청.				
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($('#cityCode').val() == obj["sggid"]) {
+							$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+						}
+					}
+				}
+			} else if($('#sungerCode').val()=='04' || $('#sungerCode').val()=='24' || $('#sungerCode').val()=='26' ){ // 지방선거 후보자 공약 구시군의장 후보자 공약에서 세종시와 제주도는 필요 없음. 			
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if(obj["sggname"] != "제주특별자치도" && obj["sggname"] != "세종특별자치시"){
+							if($('#cityCode').val() == obj["sggid"]) {
+								$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}
+					}
+				}
+			} else {
+				if(arrCode) { 
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($('#cityCode').val() == obj["sggid"]) {
+							$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+						}
+					}
+				} 
+			}
+
+			if($('#sungerCode').val()=='02' ||  $('#sungerCode').val()=='04' || $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='22' ||   $('#sungerCode').val()=='24' ||  $('#sungerCode').val()=='25' || $('#sungerCode').val()=='26' ) {
+				fnSidoChange(false);	
+			} 
+		});
+		
+	});
+	
+	//ajax 요청
+	function fnAjaxJsonSubmit(sendUrl, param, callFun) {
+		$.ajax({
+		    type : "POST" 
+		    , async : true 
+		    , url : sendUrl 
+		    , dataType : "json" 
+		    , timeout : 30000 
+		    , cache : false  
+		    , data : param 
+		    , contentType: "application/x-www-form-urlencoded; charset=UTF-8"
+		    , error : function(request, status, error) {
+		     	alert("code : " + request.status + "\r\nmessage : " + request.reponseText);
+		    }
+		    , success : function(data) {
+		    	callFun(data);
+		    }
+		    , beforeSend: function() {
+		    }
+		    , complete: function() {
+		    }
+		});
+	}
+	
+	//시도 변경시 
+	function fnSidoChange(isAjax){
+		// 국회의원(02), 구시원의장(04), 우리 동네 후보자 찾기(12)
+		$('#cityCode').val($('#citySelect').val());		
+		if(isAjax){
+			$('#guCode').val('');
+			$('#lastCode').val('');
+		}
+		
+		// 해당 선거코드 일때  시,군,구 선택하는 select box 생성
+		if($('#sungerCode').val()=='02' || $('#sungerCode').val()=='04' || $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06' || $('#sungerCode').val()=='12' ||   $('#sungerCode').val()=='24' || $('#sungerCode').val()=='25' ) {
+			$('#searchSelect2').html("<select id='guSelect' name='guSelect' onchange='fnGuChange(true)'><option value=''>전체</option></select>");
+		
+			if($('#citySelect').val()=='') {
+				if($('#sungerCode').val()=='05' || $('#sungerCode').val()=='06' || $('#sungerCode').val()=='12'|| $('#sungerCode').val()=='25'){
+					$('#searchSelect3').html("<select id='lastSelect' name='lastSelect' onchange='fnLastChange()'><option value=''>전체</option></select>");
+				}
+				return;
+			}
+			var sendUrl = "/svc/sungergu/GetCode.do";
+			
+			// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+			if($('#sungerCode').val()=='12'){
+				sendUrl = "/svc/policyLocal/getLocal.do";
+			}
+			
+			var param = {"type" : "2","code":$('#citySelect').val()};
+			
+			if($('#sungerCode').val()=='02'){
+				param = {"type" : "7","code":$('#citySelect').val()};
+			}else if($('#sungerCode').val()=='22'){
+				param = {"type" : "8","code":$('#citySelect').val()};
+			}else if($('#sungerCode').val()=='04'){
+				//param = {"type" : "2","code":$('#citySelect').val()};
+				param = {"type" : "11","code":$('#citySelect').val(), "sgCode":$('#sungerCode').val()};
+			}else if($('#sungerCode').val()=='24'){
+				param = {"type" : "11","code":$('#citySelect').val(), "sgCode":$('#sungerCode').val()};
+			}
+
+			fnAjaxJsonSubmit(sendUrl, param, function(data){
+				$('#guSelect option[value!=""]').remove();
+				var arrCode = data["code"];
+				
+				// 우리 동네 후보자 찾기 별도 출력
+				if($('#sungerCode').val()=='12'){		
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#guCode').val() == obj["gsg_id"]){
+								$('#guSelect').append('<option value="'+obj["gsg_id"]+'" selected>'+obj["gsg_name"]+'</option>');
+							} else { 
+								$('#guSelect').append('<option value="'+obj["gsg_id"]+'">'+obj["gsg_name"]+'</option>');
+							}
+						}			
+					}
+				} else {
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#guCode').val() == obj["sggid"]){
+								$('#guSelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#guSelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}			
+					}
+				}
+				if( $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='25' ) {
+					fnGuChange(isAjax);
+				} 
+			});
+		}
+	}
+	
+	//구 변경시 
+	function fnGuChange(isAjax){
+		$('#guCode').val($('#guSelect').val());	
+		if(isAjax) {
+			$('#lastCode').val('');
+		}
+		
+		if($('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='25' ){
+			$('#searchSelect3').html("<select id='lastSelect' name='lastSelect' onchange='fnLastChange()'><option value=''>전체</option></select>");	
+			if($('#guSelect').val()=='' ||  $('#citySelect').val() =='')
+				return;
+			var sendUrl = "/svc/sungergu/GetCode.do";
+			var param = {"type":type, "code":$('#citySelect').val()+'|'+$('#guSelect').val()};			
+			
+			var type = 3;
+			if($('#sungerCode').val()=='06'){
+				type = 4;
+			}else if($('#sungerCode').val()=='12'){
+				sendUrl = "/svc/policyLocal/getLocal.do";
+				type = 5;
+				var param = {"type":type, "code":$('#guSelect').val()};
+			}else if($('#sungerCode').val()=='25' || $('#sungerCode').val()=='26'){
+				sendUrl =  "/svc/sungergu/GetCode.do";
+				type = 3;
+				var param = {"type":type,  "code":$('#citySelect').val()+''+$('#guSelect').val(), "sgCode":$('#sungerCode').val()};
+			}
+							
+			fnAjaxJsonSubmit(sendUrl, param, function(data){
+				$('#lastSelect option[value!=""]').remove();
+				var arrCode = data["code"];				
+				
+				if($('#sungerCode').val()=='12'){		
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#lastCode').val() == obj["emd_id"]) {
+								$('#lastSelect').append('<option value="'+obj["emd_id"]+'" selected>'+obj["emd_name"]+'</option>');
+							} else { 
+								$('#lastSelect').append('<option value="'+obj["emd_id"]+'">'+obj["emd_name"]+'</option>');
+							}
+						}			
+					}
+				} else {
+					if(arrCode) {					
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#lastCode').val() == obj["sggid"]) {
+								$('#lastSelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#lastSelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}			
+					}
+				}
+			});
+		}
+	}
+	
+	//3뎁스 변경
+	function fnLastChange() {
+		$('#lastCode').val($('#lastSelect').val());
+	}
+	
+	
+
+
+		$(function() {
+			var gnbHr = $('#gnbWrap');
+			//gnbHr.find('>ul>li>ul').hide();
+			//gnbHr.find('>ul>li.on>ul').show();
+
+			gnbHr.find('>ul>li').mouseover(function(){ // 마우스를 올리면
+				$(this).addClass("on"); //active 클래스를 적용
+				gnbHr.find('>ul>li>.submenu').hide(); // 모든 서브메뉴 숨김
+				gnbHr.find('>ul>li.on>.submenu').show(); // active의 하위 서브메뉴 열림
+			})
+			gnbHr.find('>ul>li').mouseleave(function(){ // 마우스를 떼면
+				gnbHr.find('>ul>li.on').removeClass("on"); //기존 active 클래스 제거
+				gnbHr.find('>ul>li>.submenu').hide(); // 모든 서브메뉴 숨김
+				gnbHr.find('>ul>li.on>.submenu').show(); // 원래 열려있던 서브메뉴 열림
+			})
+		});
+	
+
+
+
+
+
+
+
+중앙선거관리위원회 홈페이지 바로가기
+
+메뉴열기
+
+
+지난 선거 공약
+
+
+대통령선거
+국회의원선거
+지방선거
+
+
+
+당선인공약
+
+
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+
+
+
+
+정책선거란?
+
+
+
+
+
+
+
+
+
+정당 정책ㆍ공약
+제19대 대통령 선거
+
+
+
+
+대통령 선거 선택: 
+
+제19대 대통령선거
+제18대 대통령선거
+제17대 대통령선거
+
+
+
+
+						function gotoPcontent() {
+							if ($("#selection option:selected").val()=="#")
+								alert("2012년 제18대 대통령선거에서는 정당의 정책ㆍ공약은 제출받지 않았습니다.");
+							else 
+								location.href = $("#selection option:selected").val();
+						}
+					
+
+
+
+
+
+
+더불어민주당 문재인
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+자유한국당 홍준표
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민의당 안철수
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+바른정당 유승민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+정의당 심상정
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+새누리당 조원진
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+경제애국당 오영국
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민대통합당 장성민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+늘푸른한국당 이재오
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+민중연합당 김선동
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+통일한국당 남재준
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한국국민당 이경희
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한반도미래연합 김정선
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+홍익당 윤홍식
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+
+
+※ 선거관리위원회는 2006년도 이후 임기만료 선거에서 매니페스토 정책선거 정착을 위해 정당의 정책·공약을 제출받아 공개하여 왔습니다.
+※ 다만, 2012년 제18대 대통령선거에서는 정당의 정책·공약은 제출받지 않았습니다.
+
+
+
+
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-51281666-1', 'nec.go.kr');
+  ga('send', 'pageview');
+
+
+
+
+			if(!wcs_add) var wcs_add = {}; wcs_add["wa"] = "75c21f31779ce0"; wcs_do();
+		
+
+
+
+개인정보처리방침
+저작권정책
+연락처
+찾아오시는길
+RSS
+홈페이지도우미
+
+
+
+
+[13809] 경기도 과천시 홍촌말로 44(중앙동 2-3) 중앙선거관리위원회
+대표전화 : 02-503-1114 선거법질의·신고제보 : 국번없이 1390
+Skip Navigation
+
+본문 바로가기
+주메뉴 바로가기
+Skip Navigation
+본문 바로가기
+주메뉴 바로가기
+본문 바로가기
+본문 바로가기
+주메뉴 바로가기
+주메뉴 바로가기
+//선거구 페이지 이동
+	function fnGopage(sungerCode, isContents) {
+		if(isContents){
+			$("#page").val('');
+			$('#sungerCode').val('');
+			$('#cityCode').val('');
+			$('#guCode').val('');
+			$('#lastCode').val('');
+			$('#searchStr').val(''); 
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyContent"+sungerCode+".do");
+		} else {
+			$("#page").val(1);
+			$('#sungerCode').val(sungerCode);
+			$('#cityCode').val('');
+			$('#guCode').val('');
+			$('#lastCode').val('');
+			$('#searchStr').val(''); 
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyList.do");
+		}
+		$("#searchPolicyVO").submit();
+	}
+	
+	function fnSearch() {
+		$("#page").val(1); 
+
+		// 지역별 후보 보기
+		if($('#sungerCode').val()== 12){
+			if($("citySelect").val() == ''){
+				alert("시,도 를 선택해주세요.");
+				return false;
+			} else if($("#guSelect").val() == ''){
+				alert("시,군,구 를 선택해주세요.");
+				return false;
+			} else if($("#lastSelect").val() == ''){
+				alert("읍,면,동 을 선택해주세요.");
+				return false;
+			}
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyLocalList.do");	
+		}else{
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyList.do");
+		}
+		$("#searchPolicyVO").submit();	
+	}
+	
+	//select box 초기 세팅
+	$( document ).ready(function() {
+		// 시,도 를 출력하는 select box 생성
+		$('#searchSelect').html("<select id='citySelect' name='citySelect' onchange='fnSidoChange(true)'><option value=''>전체</option></select>");
+		
+		// 선거구 항목들을 가져온다
+		var sendUrl = "/svc/sungergu/GetCode.do";
+		
+		// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+		if($('#sungerCode').val()=='12'){
+			sendUrl = "/svc/policyLocal/getLocal.do";
+		}
+		
+		var code = '04';
+		if($('#sungerCode').val()=='02' || $('#sungerCode').val()=='10' || $('#sungerCode').val()=='11' || $('#sungerCode').val()=='03' || $('#sungerCode').val()=='22' || $('#sungerCode').val()=='25' || $('#sungerCode').val()=='26' || $('#sungerCode').val()=='12') {
+			code = $('#sungerCode').val();
+		} else if($('#sungerCode').val()=='30'){
+			code = '30';
+		}
+		
+		//후보자공약 메뉴
+		if($('#sungerCode').val()=='22'){ 
+			// 후보자공약-국회의원 재보궐선거
+			var param = {"type" : "0","code":code};
+		}else if($('#sungerCode').val()=='26'){ 
+			// 후보자공약-구시군의원 재보궐선거
+			var param = {"type" : "0","code":code};
+		}else{
+			//나머지
+			var param = {"type" : "1","code":code};
+		} 
+
+		fnAjaxJsonSubmit(sendUrl, param, function(data){
+			$('#citySelect option[value!=""]').remove();
+			var arrCode = data["code"];
+			
+			// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+			if($('#sungerCode').val()=='12'){				
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($("#cityCode").val() == obj["sd_id"]){
+							$('#citySelect').append('<option value="'+obj["sd_id"]+'" selected>'+obj["sd_name"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sd_id"]+'">'+obj["sd_name"]+'</option>');
+						}
+					}
+				}
+			} else if($('#sungerCode').val()=='30'){ // 지방선거 후보자 공약에서 교육의원은 제주도만 남기고 삭제해달라는 요청.				
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($('#cityCode').val() == obj["sggid"]) {
+							$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+						}
+					}
+				}
+			} else if($('#sungerCode').val()=='04' || $('#sungerCode').val()=='24' || $('#sungerCode').val()=='26' ){ // 지방선거 후보자 공약 구시군의장 후보자 공약에서 세종시와 제주도는 필요 없음. 			
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if(obj["sggname"] != "제주특별자치도" && obj["sggname"] != "세종특별자치시"){
+							if($('#cityCode').val() == obj["sggid"]) {
+								$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}
+					}
+				}
+			} else {
+				if(arrCode) { 
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($('#cityCode').val() == obj["sggid"]) {
+							$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+						}
+					}
+				} 
+			}
+
+			if($('#sungerCode').val()=='02' ||  $('#sungerCode').val()=='04' || $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='22' ||   $('#sungerCode').val()=='24' ||  $('#sungerCode').val()=='25' || $('#sungerCode').val()=='26' ) {
+				fnSidoChange(false);	
+			} 
+		});
+		
+	});
+	
+	//ajax 요청
+	function fnAjaxJsonSubmit(sendUrl, param, callFun) {
+		$.ajax({
+		    type : "POST" 
+		    , async : true 
+		    , url : sendUrl 
+		    , dataType : "json" 
+		    , timeout : 30000 
+		    , cache : false  
+		    , data : param 
+		    , contentType: "application/x-www-form-urlencoded; charset=UTF-8"
+		    , error : function(request, status, error) {
+		     	alert("code : " + request.status + "\r\nmessage : " + request.reponseText);
+		    }
+		    , success : function(data) {
+		    	callFun(data);
+		    }
+		    , beforeSend: function() {
+		    }
+		    , complete: function() {
+		    }
+		});
+	}
+	
+	//시도 변경시 
+	function fnSidoChange(isAjax){
+		// 국회의원(02), 구시원의장(04), 우리 동네 후보자 찾기(12)
+		$('#cityCode').val($('#citySelect').val());		
+		if(isAjax){
+			$('#guCode').val('');
+			$('#lastCode').val('');
+		}
+		
+		// 해당 선거코드 일때  시,군,구 선택하는 select box 생성
+		if($('#sungerCode').val()=='02' || $('#sungerCode').val()=='04' || $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06' || $('#sungerCode').val()=='12' ||   $('#sungerCode').val()=='24' || $('#sungerCode').val()=='25' ) {
+			$('#searchSelect2').html("<select id='guSelect' name='guSelect' onchange='fnGuChange(true)'><option value=''>전체</option></select>");
+		
+			if($('#citySelect').val()=='') {
+				if($('#sungerCode').val()=='05' || $('#sungerCode').val()=='06' || $('#sungerCode').val()=='12'|| $('#sungerCode').val()=='25'){
+					$('#searchSelect3').html("<select id='lastSelect' name='lastSelect' onchange='fnLastChange()'><option value=''>전체</option></select>");
+				}
+				return;
+			}
+			var sendUrl = "/svc/sungergu/GetCode.do";
+			
+			// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+			if($('#sungerCode').val()=='12'){
+				sendUrl = "/svc/policyLocal/getLocal.do";
+			}
+			
+			var param = {"type" : "2","code":$('#citySelect').val()};
+			
+			if($('#sungerCode').val()=='02'){
+				param = {"type" : "7","code":$('#citySelect').val()};
+			}else if($('#sungerCode').val()=='22'){
+				param = {"type" : "8","code":$('#citySelect').val()};
+			}else if($('#sungerCode').val()=='04'){
+				//param = {"type" : "2","code":$('#citySelect').val()};
+				param = {"type" : "11","code":$('#citySelect').val(), "sgCode":$('#sungerCode').val()};
+			}else if($('#sungerCode').val()=='24'){
+				param = {"type" : "11","code":$('#citySelect').val(), "sgCode":$('#sungerCode').val()};
+			}
+
+			fnAjaxJsonSubmit(sendUrl, param, function(data){
+				$('#guSelect option[value!=""]').remove();
+				var arrCode = data["code"];
+				
+				// 우리 동네 후보자 찾기 별도 출력
+				if($('#sungerCode').val()=='12'){		
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#guCode').val() == obj["gsg_id"]){
+								$('#guSelect').append('<option value="'+obj["gsg_id"]+'" selected>'+obj["gsg_name"]+'</option>');
+							} else { 
+								$('#guSelect').append('<option value="'+obj["gsg_id"]+'">'+obj["gsg_name"]+'</option>');
+							}
+						}			
+					}
+				} else {
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#guCode').val() == obj["sggid"]){
+								$('#guSelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#guSelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}			
+					}
+				}
+				if( $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='25' ) {
+					fnGuChange(isAjax);
+				} 
+			});
+		}
+	}
+	
+	//구 변경시 
+	function fnGuChange(isAjax){
+		$('#guCode').val($('#guSelect').val());	
+		if(isAjax) {
+			$('#lastCode').val('');
+		}
+		
+		if($('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='25' ){
+			$('#searchSelect3').html("<select id='lastSelect' name='lastSelect' onchange='fnLastChange()'><option value=''>전체</option></select>");	
+			if($('#guSelect').val()=='' ||  $('#citySelect').val() =='')
+				return;
+			var sendUrl = "/svc/sungergu/GetCode.do";
+			var param = {"type":type, "code":$('#citySelect').val()+'|'+$('#guSelect').val()};			
+			
+			var type = 3;
+			if($('#sungerCode').val()=='06'){
+				type = 4;
+			}else if($('#sungerCode').val()=='12'){
+				sendUrl = "/svc/policyLocal/getLocal.do";
+				type = 5;
+				var param = {"type":type, "code":$('#guSelect').val()};
+			}else if($('#sungerCode').val()=='25' || $('#sungerCode').val()=='26'){
+				sendUrl =  "/svc/sungergu/GetCode.do";
+				type = 3;
+				var param = {"type":type,  "code":$('#citySelect').val()+''+$('#guSelect').val(), "sgCode":$('#sungerCode').val()};
+			}
+							
+			fnAjaxJsonSubmit(sendUrl, param, function(data){
+				$('#lastSelect option[value!=""]').remove();
+				var arrCode = data["code"];				
+				
+				if($('#sungerCode').val()=='12'){		
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#lastCode').val() == obj["emd_id"]) {
+								$('#lastSelect').append('<option value="'+obj["emd_id"]+'" selected>'+obj["emd_name"]+'</option>');
+							} else { 
+								$('#lastSelect').append('<option value="'+obj["emd_id"]+'">'+obj["emd_name"]+'</option>');
+							}
+						}			
+					}
+				} else {
+					if(arrCode) {					
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#lastCode').val() == obj["sggid"]) {
+								$('#lastSelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#lastSelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}			
+					}
+				}
+			});
+		}
+	}
+	
+	//3뎁스 변경
+	function fnLastChange() {
+		$('#lastCode').val($('#lastSelect').val());
+	}
+	
+	
+
+
+		$(function() {
+			var gnbHr = $('#gnbWrap');
+			//gnbHr.find('>ul>li>ul').hide();
+			//gnbHr.find('>ul>li.on>ul').show();
+
+			gnbHr.find('>ul>li').mouseover(function(){ // 마우스를 올리면
+				$(this).addClass("on"); //active 클래스를 적용
+				gnbHr.find('>ul>li>.submenu').hide(); // 모든 서브메뉴 숨김
+				gnbHr.find('>ul>li.on>.submenu').show(); // active의 하위 서브메뉴 열림
+			})
+			gnbHr.find('>ul>li').mouseleave(function(){ // 마우스를 떼면
+				gnbHr.find('>ul>li.on').removeClass("on"); //기존 active 클래스 제거
+				gnbHr.find('>ul>li>.submenu').hide(); // 모든 서브메뉴 숨김
+				gnbHr.find('>ul>li.on>.submenu').show(); // 원래 열려있던 서브메뉴 열림
+			})
+		});
+	
+
+
+
+
+
+
+
+중앙선거관리위원회 홈페이지 바로가기
+
+메뉴열기
+
+
+지난 선거 공약
+
+
+대통령선거
+국회의원선거
+지방선거
+
+
+
+당선인공약
+
+
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+
+
+
+
+정책선거란?
+
+
+
+
+
+
+
+
+
+정당 정책ㆍ공약
+제19대 대통령 선거
+
+
+
+
+대통령 선거 선택: 
+
+제19대 대통령선거
+제18대 대통령선거
+제17대 대통령선거
+
+
+
+
+						function gotoPcontent() {
+							if ($("#selection option:selected").val()=="#")
+								alert("2012년 제18대 대통령선거에서는 정당의 정책ㆍ공약은 제출받지 않았습니다.");
+							else 
+								location.href = $("#selection option:selected").val();
+						}
+					
+
+
+
+
+
+
+더불어민주당 문재인
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+자유한국당 홍준표
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민의당 안철수
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+바른정당 유승민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+정의당 심상정
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+새누리당 조원진
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+경제애국당 오영국
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민대통합당 장성민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+늘푸른한국당 이재오
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+민중연합당 김선동
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+통일한국당 남재준
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한국국민당 이경희
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한반도미래연합 김정선
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+홍익당 윤홍식
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+
+
+※ 선거관리위원회는 2006년도 이후 임기만료 선거에서 매니페스토 정책선거 정착을 위해 정당의 정책·공약을 제출받아 공개하여 왔습니다.
+※ 다만, 2012년 제18대 대통령선거에서는 정당의 정책·공약은 제출받지 않았습니다.
+
+
+
+
+
+
+
+
+//선거구 페이지 이동
+	function fnGopage(sungerCode, isContents) {
+		if(isContents){
+			$("#page").val('');
+			$('#sungerCode').val('');
+			$('#cityCode').val('');
+			$('#guCode').val('');
+			$('#lastCode').val('');
+			$('#searchStr').val(''); 
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyContent"+sungerCode+".do");
+		} else {
+			$("#page").val(1);
+			$('#sungerCode').val(sungerCode);
+			$('#cityCode').val('');
+			$('#guCode').val('');
+			$('#lastCode').val('');
+			$('#searchStr').val(''); 
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyList.do");
+		}
+		$("#searchPolicyVO").submit();
+	}
+	
+	function fnSearch() {
+		$("#page").val(1); 
+
+		// 지역별 후보 보기
+		if($('#sungerCode').val()== 12){
+			if($("citySelect").val() == ''){
+				alert("시,도 를 선택해주세요.");
+				return false;
+			} else if($("#guSelect").val() == ''){
+				alert("시,군,구 를 선택해주세요.");
+				return false;
+			} else if($("#lastSelect").val() == ''){
+				alert("읍,면,동 을 선택해주세요.");
+				return false;
+			}
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyLocalList.do");	
+		}else{
+			$("#searchPolicyVO").attr("action", "/svc/policy/PolicyList.do");
+		}
+		$("#searchPolicyVO").submit();	
+	}
+	
+	//select box 초기 세팅
+	$( document ).ready(function() {
+		// 시,도 를 출력하는 select box 생성
+		$('#searchSelect').html("<select id='citySelect' name='citySelect' onchange='fnSidoChange(true)'><option value=''>전체</option></select>");
+		
+		// 선거구 항목들을 가져온다
+		var sendUrl = "/svc/sungergu/GetCode.do";
+		
+		// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+		if($('#sungerCode').val()=='12'){
+			sendUrl = "/svc/policyLocal/getLocal.do";
+		}
+		
+		var code = '04';
+		if($('#sungerCode').val()=='02' || $('#sungerCode').val()=='10' || $('#sungerCode').val()=='11' || $('#sungerCode').val()=='03' || $('#sungerCode').val()=='22' || $('#sungerCode').val()=='25' || $('#sungerCode').val()=='26' || $('#sungerCode').val()=='12') {
+			code = $('#sungerCode').val();
+		} else if($('#sungerCode').val()=='30'){
+			code = '30';
+		}
+		
+		//후보자공약 메뉴
+		if($('#sungerCode').val()=='22'){ 
+			// 후보자공약-국회의원 재보궐선거
+			var param = {"type" : "0","code":code};
+		}else if($('#sungerCode').val()=='26'){ 
+			// 후보자공약-구시군의원 재보궐선거
+			var param = {"type" : "0","code":code};
+		}else{
+			//나머지
+			var param = {"type" : "1","code":code};
+		} 
+
+		fnAjaxJsonSubmit(sendUrl, param, function(data){
+			$('#citySelect option[value!=""]').remove();
+			var arrCode = data["code"];
+			
+			// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+			if($('#sungerCode').val()=='12'){				
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($("#cityCode").val() == obj["sd_id"]){
+							$('#citySelect').append('<option value="'+obj["sd_id"]+'" selected>'+obj["sd_name"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sd_id"]+'">'+obj["sd_name"]+'</option>');
+						}
+					}
+				}
+			} else if($('#sungerCode').val()=='30'){ // 지방선거 후보자 공약에서 교육의원은 제주도만 남기고 삭제해달라는 요청.				
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($('#cityCode').val() == obj["sggid"]) {
+							$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+						}
+					}
+				}
+			} else if($('#sungerCode').val()=='04' || $('#sungerCode').val()=='24' || $('#sungerCode').val()=='26' ){ // 지방선거 후보자 공약 구시군의장 후보자 공약에서 세종시와 제주도는 필요 없음. 			
+				if(arrCode){
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if(obj["sggname"] != "제주특별자치도" && obj["sggname"] != "세종특별자치시"){
+							if($('#cityCode').val() == obj["sggid"]) {
+								$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}
+					}
+				}
+			} else {
+				if(arrCode) { 
+					for(var i=0; i<arrCode.length; i++) {
+						var obj = arrCode[i];
+						if($('#cityCode').val() == obj["sggid"]) {
+							$('#citySelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+						} else { 
+							$('#citySelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+						}
+					}
+				} 
+			}
+
+			if($('#sungerCode').val()=='02' ||  $('#sungerCode').val()=='04' || $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='22' ||   $('#sungerCode').val()=='24' ||  $('#sungerCode').val()=='25' || $('#sungerCode').val()=='26' ) {
+				fnSidoChange(false);	
+			} 
+		});
+		
+	});
+	
+	//ajax 요청
+	function fnAjaxJsonSubmit(sendUrl, param, callFun) {
+		$.ajax({
+		    type : "POST" 
+		    , async : true 
+		    , url : sendUrl 
+		    , dataType : "json" 
+		    , timeout : 30000 
+		    , cache : false  
+		    , data : param 
+		    , contentType: "application/x-www-form-urlencoded; charset=UTF-8"
+		    , error : function(request, status, error) {
+		     	alert("code : " + request.status + "\r\nmessage : " + request.reponseText);
+		    }
+		    , success : function(data) {
+		    	callFun(data);
+		    }
+		    , beforeSend: function() {
+		    }
+		    , complete: function() {
+		    }
+		});
+	}
+	
+	//시도 변경시 
+	function fnSidoChange(isAjax){
+		// 국회의원(02), 구시원의장(04), 우리 동네 후보자 찾기(12)
+		$('#cityCode').val($('#citySelect').val());		
+		if(isAjax){
+			$('#guCode').val('');
+			$('#lastCode').val('');
+		}
+		
+		// 해당 선거코드 일때  시,군,구 선택하는 select box 생성
+		if($('#sungerCode').val()=='02' || $('#sungerCode').val()=='04' || $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06' || $('#sungerCode').val()=='12' ||   $('#sungerCode').val()=='24' || $('#sungerCode').val()=='25' ) {
+			$('#searchSelect2').html("<select id='guSelect' name='guSelect' onchange='fnGuChange(true)'><option value=''>전체</option></select>");
+		
+			if($('#citySelect').val()=='') {
+				if($('#sungerCode').val()=='05' || $('#sungerCode').val()=='06' || $('#sungerCode').val()=='12'|| $('#sungerCode').val()=='25'){
+					$('#searchSelect3').html("<select id='lastSelect' name='lastSelect' onchange='fnLastChange()'><option value=''>전체</option></select>");
+				}
+				return;
+			}
+			var sendUrl = "/svc/sungergu/GetCode.do";
+			
+			// 우리 동네 후보자 찾기는 별도로 지역 리스트를 가져온다.
+			if($('#sungerCode').val()=='12'){
+				sendUrl = "/svc/policyLocal/getLocal.do";
+			}
+			
+			var param = {"type" : "2","code":$('#citySelect').val()};
+			
+			if($('#sungerCode').val()=='02'){
+				param = {"type" : "7","code":$('#citySelect').val()};
+			}else if($('#sungerCode').val()=='22'){
+				param = {"type" : "8","code":$('#citySelect').val()};
+			}else if($('#sungerCode').val()=='04'){
+				//param = {"type" : "2","code":$('#citySelect').val()};
+				param = {"type" : "11","code":$('#citySelect').val(), "sgCode":$('#sungerCode').val()};
+			}else if($('#sungerCode').val()=='24'){
+				param = {"type" : "11","code":$('#citySelect').val(), "sgCode":$('#sungerCode').val()};
+			}
+
+			fnAjaxJsonSubmit(sendUrl, param, function(data){
+				$('#guSelect option[value!=""]').remove();
+				var arrCode = data["code"];
+				
+				// 우리 동네 후보자 찾기 별도 출력
+				if($('#sungerCode').val()=='12'){		
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#guCode').val() == obj["gsg_id"]){
+								$('#guSelect').append('<option value="'+obj["gsg_id"]+'" selected>'+obj["gsg_name"]+'</option>');
+							} else { 
+								$('#guSelect').append('<option value="'+obj["gsg_id"]+'">'+obj["gsg_name"]+'</option>');
+							}
+						}			
+					}
+				} else {
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#guCode').val() == obj["sggid"]){
+								$('#guSelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#guSelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}			
+					}
+				}
+				if( $('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='25' ) {
+					fnGuChange(isAjax);
+				} 
+			});
+		}
+	}
+	
+	//구 변경시 
+	function fnGuChange(isAjax){
+		$('#guCode').val($('#guSelect').val());	
+		if(isAjax) {
+			$('#lastCode').val('');
+		}
+		
+		if($('#sungerCode').val()=='05' || $('#sungerCode').val()=='06'|| $('#sungerCode').val()=='12' || $('#sungerCode').val()=='25' ){
+			$('#searchSelect3').html("<select id='lastSelect' name='lastSelect' onchange='fnLastChange()'><option value=''>전체</option></select>");	
+			if($('#guSelect').val()=='' ||  $('#citySelect').val() =='')
+				return;
+			var sendUrl = "/svc/sungergu/GetCode.do";
+			var param = {"type":type, "code":$('#citySelect').val()+'|'+$('#guSelect').val()};			
+			
+			var type = 3;
+			if($('#sungerCode').val()=='06'){
+				type = 4;
+			}else if($('#sungerCode').val()=='12'){
+				sendUrl = "/svc/policyLocal/getLocal.do";
+				type = 5;
+				var param = {"type":type, "code":$('#guSelect').val()};
+			}else if($('#sungerCode').val()=='25' || $('#sungerCode').val()=='26'){
+				sendUrl =  "/svc/sungergu/GetCode.do";
+				type = 3;
+				var param = {"type":type,  "code":$('#citySelect').val()+''+$('#guSelect').val(), "sgCode":$('#sungerCode').val()};
+			}
+							
+			fnAjaxJsonSubmit(sendUrl, param, function(data){
+				$('#lastSelect option[value!=""]').remove();
+				var arrCode = data["code"];				
+				
+				if($('#sungerCode').val()=='12'){		
+					if(arrCode) {
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#lastCode').val() == obj["emd_id"]) {
+								$('#lastSelect').append('<option value="'+obj["emd_id"]+'" selected>'+obj["emd_name"]+'</option>');
+							} else { 
+								$('#lastSelect').append('<option value="'+obj["emd_id"]+'">'+obj["emd_name"]+'</option>');
+							}
+						}			
+					}
+				} else {
+					if(arrCode) {					
+						for(var i=0; i<arrCode.length; i++) {
+							var obj = arrCode[i];
+							if($('#lastCode').val() == obj["sggid"]) {
+								$('#lastSelect').append('<option value="'+obj["sggid"]+'" selected>'+obj["sggname"]+'</option>');
+							} else { 
+								$('#lastSelect').append('<option value="'+obj["sggid"]+'">'+obj["sggname"]+'</option>');
+							}
+						}			
+					}
+				}
+			});
+		}
+	}
+	
+	//3뎁스 변경
+	function fnLastChange() {
+		$('#lastCode').val($('#lastSelect').val());
+	}
+$(function() {
+			var gnbHr = $('#gnbWrap');
+			//gnbHr.find('>ul>li>ul').hide();
+			//gnbHr.find('>ul>li.on>ul').show();
+
+			gnbHr.find('>ul>li').mouseover(function(){ // 마우스를 올리면
+				$(this).addClass("on"); //active 클래스를 적용
+				gnbHr.find('>ul>li>.submenu').hide(); // 모든 서브메뉴 숨김
+				gnbHr.find('>ul>li.on>.submenu').show(); // active의 하위 서브메뉴 열림
+			})
+			gnbHr.find('>ul>li').mouseleave(function(){ // 마우스를 떼면
+				gnbHr.find('>ul>li.on').removeClass("on"); //기존 active 클래스 제거
+				gnbHr.find('>ul>li>.submenu').hide(); // 모든 서브메뉴 숨김
+				gnbHr.find('>ul>li.on>.submenu').show(); // 원래 열려있던 서브메뉴 열림
+			})
+		});
+
+중앙선거관리위원회 홈페이지 바로가기
+
+메뉴열기
+
+
+지난 선거 공약
+
+
+대통령선거
+국회의원선거
+지방선거
+
+
+
+당선인공약
+
+
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+
+
+
+
+정책선거란?
+
+
+
+
+
+
+
+
+
+정당 정책ㆍ공약
+제19대 대통령 선거
+
+
+
+
+대통령 선거 선택: 
+
+제19대 대통령선거
+제18대 대통령선거
+제17대 대통령선거
+
+
+
+
+						function gotoPcontent() {
+							if ($("#selection option:selected").val()=="#")
+								alert("2012년 제18대 대통령선거에서는 정당의 정책ㆍ공약은 제출받지 않았습니다.");
+							else 
+								location.href = $("#selection option:selected").val();
+						}
+					
+
+
+
+
+
+
+더불어민주당 문재인
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+자유한국당 홍준표
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민의당 안철수
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+바른정당 유승민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+정의당 심상정
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+새누리당 조원진
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+경제애국당 오영국
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민대통합당 장성민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+늘푸른한국당 이재오
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+민중연합당 김선동
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+통일한국당 남재준
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한국국민당 이경희
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한반도미래연합 김정선
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+홍익당 윤홍식
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+
+
+※ 선거관리위원회는 2006년도 이후 임기만료 선거에서 매니페스토 정책선거 정착을 위해 정당의 정책·공약을 제출받아 공개하여 왔습니다.
+※ 다만, 2012년 제18대 대통령선거에서는 정당의 정책·공약은 제출받지 않았습니다.
+중앙선거관리위원회 홈페이지 바로가기
+
+메뉴열기
+
+
+지난 선거 공약
+
+
+대통령선거
+국회의원선거
+지방선거
+
+
+
+당선인공약
+
+
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+
+
+
+
+정책선거란?
+중앙선거관리위원회 홈페이지 바로가기
+
+메뉴열기
+
+
+지난 선거 공약
+
+
+대통령선거
+국회의원선거
+지방선거
+
+
+
+당선인공약
+
+
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+
+
+
+
+정책선거란?
+중앙선거관리위원회 홈페이지 바로가기
+
+메뉴열기
+
+
+지난 선거 공약
+
+
+대통령선거
+국회의원선거
+지방선거
+
+
+
+당선인공약
+
+
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+
+
+
+
+정책선거란?
+
+
+
+중앙선거관리위원회 홈페이지 바로가기
+중앙선거관리위원회 홈페이지 바로가기
+중앙선거관리위원회 홈페이지 바로가기
+메뉴열기
+지난 선거 공약
+
+
+대통령선거
+국회의원선거
+지방선거
+
+
+
+당선인공약
+
+
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+
+
+
+
+정책선거란?
+지난 선거 공약
+
+
+대통령선거
+국회의원선거
+지방선거
+
+
+
+당선인공약
+
+
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+
+
+
+
+정책선거란?
+지난 선거 공약
+
+
+대통령선거
+국회의원선거
+지방선거
+지난 선거 공약
+대통령선거
+국회의원선거
+지방선거
+대통령선거
+국회의원선거
+지방선거
+대통령선거
+대통령선거
+국회의원선거
+국회의원선거
+지방선거
+지방선거
+당선인공약
+
+
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+당선인공약
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+대통령
+비례대표 국회의원
+지역구 국회의원
+시도지사
+교육감
+구시군의장
+대통령
+대통령
+비례대표 국회의원
+비례대표 국회의원
+지역구 국회의원
+지역구 국회의원
+시도지사
+시도지사
+교육감
+교육감
+구시군의장
+구시군의장
+정책선거란?
+정책선거란?
+
+정당 정책ㆍ공약
+제19대 대통령 선거
+
+
+
+
+대통령 선거 선택: 
+
+제19대 대통령선거
+제18대 대통령선거
+제17대 대통령선거
+
+
+
+
+						function gotoPcontent() {
+							if ($("#selection option:selected").val()=="#")
+								alert("2012년 제18대 대통령선거에서는 정당의 정책ㆍ공약은 제출받지 않았습니다.");
+							else 
+								location.href = $("#selection option:selected").val();
+						}
+					
+
+
+
+
+
+
+더불어민주당 문재인
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+자유한국당 홍준표
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민의당 안철수
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+바른정당 유승민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+정의당 심상정
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+새누리당 조원진
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+경제애국당 오영국
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민대통합당 장성민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+늘푸른한국당 이재오
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+민중연합당 김선동
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+통일한국당 남재준
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한국국민당 이경희
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한반도미래연합 김정선
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+홍익당 윤홍식
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+
+
+※ 선거관리위원회는 2006년도 이후 임기만료 선거에서 매니페스토 정책선거 정착을 위해 정당의 정책·공약을 제출받아 공개하여 왔습니다.
+※ 다만, 2012년 제18대 대통령선거에서는 정당의 정책·공약은 제출받지 않았습니다.
+정당 정책ㆍ공약
+제19대 대통령 선거
+
+
+
+
+대통령 선거 선택: 
+
+제19대 대통령선거
+제18대 대통령선거
+제17대 대통령선거
+
+
+
+
+						function gotoPcontent() {
+							if ($("#selection option:selected").val()=="#")
+								alert("2012년 제18대 대통령선거에서는 정당의 정책ㆍ공약은 제출받지 않았습니다.");
+							else 
+								location.href = $("#selection option:selected").val();
+						}
+					
+
+
+
+
+
+
+더불어민주당 문재인
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+자유한국당 홍준표
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민의당 안철수
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+바른정당 유승민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+정의당 심상정
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+새누리당 조원진
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+경제애국당 오영국
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민대통합당 장성민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+늘푸른한국당 이재오
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+민중연합당 김선동
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+통일한국당 남재준
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한국국민당 이경희
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한반도미래연합 김정선
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+홍익당 윤홍식
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+
+
+※ 선거관리위원회는 2006년도 이후 임기만료 선거에서 매니페스토 정책선거 정착을 위해 정당의 정책·공약을 제출받아 공개하여 왔습니다.
+※ 다만, 2012년 제18대 대통령선거에서는 정당의 정책·공약은 제출받지 않았습니다.
+정당 정책ㆍ공약
+제19대 대통령 선거
+정당 정책ㆍ공약
+정당 정책ㆍ공약
+제19대 대통령 선거
+대통령 선거 선택: 
+
+제19대 대통령선거
+제18대 대통령선거
+제17대 대통령선거
+
+
+
+
+						function gotoPcontent() {
+							if ($("#selection option:selected").val()=="#")
+								alert("2012년 제18대 대통령선거에서는 정당의 정책ㆍ공약은 제출받지 않았습니다.");
+							else 
+								location.href = $("#selection option:selected").val();
+						}
+대통령 선거 선택: 
+
+제19대 대통령선거
+제18대 대통령선거
+제17대 대통령선거
+
+
+
+
+						function gotoPcontent() {
+							if ($("#selection option:selected").val()=="#")
+								alert("2012년 제18대 대통령선거에서는 정당의 정책ㆍ공약은 제출받지 않았습니다.");
+							else 
+								location.href = $("#selection option:selected").val();
+						}
+대통령 선거 선택: 
+
+제19대 대통령선거
+제18대 대통령선거
+제17대 대통령선거
+대통령 선거 선택:
+제19대 대통령선거
+제18대 대통령선거
+제17대 대통령선거
+제19대 대통령선거
+제18대 대통령선거
+제17대 대통령선거
+
+function gotoPcontent() {
+							if ($("#selection option:selected").val()=="#")
+								alert("2012년 제18대 대통령선거에서는 정당의 정책ㆍ공약은 제출받지 않았습니다.");
+							else 
+								location.href = $("#selection option:selected").val();
+						}
+더불어민주당 문재인
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+자유한국당 홍준표
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민의당 안철수
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+바른정당 유승민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+정의당 심상정
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+새누리당 조원진
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+경제애국당 오영국
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민대통합당 장성민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+늘푸른한국당 이재오
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+민중연합당 김선동
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+통일한국당 남재준
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한국국민당 이경희
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한반도미래연합 김정선
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+홍익당 윤홍식
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+더불어민주당 문재인
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+자유한국당 홍준표
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민의당 안철수
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+바른정당 유승민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+정의당 심상정
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+새누리당 조원진
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+경제애국당 오영국
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+국민대통합당 장성민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+늘푸른한국당 이재오
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+민중연합당 김선동
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+통일한국당 남재준
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한국국민당 이경희
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+한반도미래연합 김정선
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+
+
+
+
+홍익당 윤홍식
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+더불어민주당 문재인
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+더불어민주당 문재인
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+더불어민주당 문재인
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+자유한국당 홍준표
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+자유한국당 홍준표
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+자유한국당 홍준표
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+국민의당 안철수
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+국민의당 안철수
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+국민의당 안철수
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+바른정당 유승민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+바른정당 유승민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+바른정당 유승민
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+정의당 심상정
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+정의당 심상정
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+정의당 심상정
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+새누리당 조원진
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+새누리당 조원진
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+새누리당 조원진
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+경제애국당 오영국
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+경제애국당 오영국
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+경제애국당 오영국
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+국민대통합당 장성민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+국민대통합당 장성민
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+국민대통합당 장성민
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+늘푸른한국당 이재오
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+늘푸른한국당 이재오
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+늘푸른한국당 이재오
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+민중연합당 김선동
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+민중연합당 김선동
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+민중연합당 김선동
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+통일한국당 남재준
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+통일한국당 남재준
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+통일한국당 남재준
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+한국국민당 이경희
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+한국국민당 이경희
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+한국국민당 이경희
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+한반도미래연합 김정선
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+한반도미래연합 김정선
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+한반도미래연합 김정선
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+홍익당 윤홍식
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+홍익당 윤홍식
+ 
+전체 다운로드다운받기
+등록일2017-05-15
+홍익당 윤홍식
+
+전체 다운로드다운받기
+다운받기
+다운받기
+등록일2017-05-15
+등록일
+2017-05-15
+※ 선거관리위원회는 2006년도 이후 임기만료 선거에서 매니페스토 정책선거 정착을 위해 정당의 정책·공약을 제출받아 공개하여 왔습니다.
+※ 다만, 2012년 제18대 대통령선거에서는 정당의 정책·공약은 제출받지 않았습니다.
+※ 선거관리위원회는 2006년도 이후 임기만료 선거에서 매니페스토 정책선거 정착을 위해 정당의 정책·공약을 제출받아 공개하여 왔습니다.
+※ 다만, 2012년 제18대 대통령선거에서는 정당의 정책·공약은 제출받지 않았습니다.
+※ 선거관리위원회는 2006년도 이후 임기만료 선거에서 매니페스토 정책선거 정착을 위해 정당의 정책·공약을 제출받아 공개하여 왔습니다.
+※ 다만, 2012년 제18대 대통령선거에서는 정당의 정책·공약은 제출받지 않았습니다.
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-51281666-1', 'nec.go.kr');
+  ga('send', 'pageview');
+
+if(!wcs_add) var wcs_add = {}; wcs_add["wa"] = "75c21f31779ce0"; wcs_do();
+개인정보처리방침
+저작권정책
+연락처
+찾아오시는길
+RSS
+홈페이지도우미
+
+
+
+
+[13809] 경기도 과천시 홍촌말로 44(중앙동 2-3) 중앙선거관리위원회
+대표전화 : 02-503-1114 선거법질의·신고제보 : 국번없이 1390
+개인정보처리방침
+저작권정책
+연락처
+찾아오시는길
+RSS
+홈페이지도우미
+개인정보처리방침
+저작권정책
+연락처
+찾아오시는길
+RSS
+홈페이지도우미
+개인정보처리방침
+개인정보처리방침
+저작권정책
+저작권정책
+연락처
+연락처
+찾아오시는길
+찾아오시는길
+RSS
+RSS
+홈페이지도우미
+홈페이지도우미
+[13809] 경기도 과천시 홍촌말로 44(중앙동 2-3) 중앙선거관리위원회
+대표전화 : 02-503-1114 선거법질의·신고제보 : 국번없이 1390
+[13809] 경기도 과천시 홍촌말로 44(중앙동 2-3) 중앙선거관리위원회
+대표전화 : 02-503-1114 선거법질의·신고제보 : 국번없이 1390
+[13809] 경기도 과천시 홍촌말로 44(중앙동 2-3) 중앙선거관리위원회
+대표전화 : 02-503-1114 선거법질의·신고제보 : 국번없이 1390
+1390
