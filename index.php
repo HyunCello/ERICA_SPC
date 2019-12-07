@@ -21,10 +21,9 @@
         <nav>
             <div>
                 <p>
-                <?php
-            print "Hello, PHP!";
-            ?>
-                정치 공약들을 정리해서 보여드립니다.
+                    <?php
+                        print "정치 공약들을 정리해서 보여드립니다.";
+                    ?>
                 </p>
 
             </div>        
@@ -71,9 +70,28 @@
         </span>
         <article>
             <section>
+            <?php
+					$playlist_m3u = glob("crawling/crawlled/*.m3u");
+					foreach($playlist_m3u as $playlist) { ?>
+						
+						<?php 
+						$files = file($playlist);
+						foreach ($files as $file){?>
+							<div>
+								<?php
+								$pos = stripos($file,"#");
+								if ($pos !== 0){ ?>
+								<p><?= $file ?> <?=stripos($file, "#")?></p>
+								<?php } ?>
+							
+							</div>
+						<?php } ?>
+					<?php } ?>
+
+
                 <div><button onclick="readTextFileAlert('/crawling/crawlled/제19대대통령후보.txt')">Click me!</button>
                     <p>
-                    정세균<span><script>readTextFile('/crawling/crawlled/제19대대통령후보.txt')</script> </span>
+                    정세균
                         section
                     </p>
                 </div>
