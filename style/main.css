@@ -48,8 +48,8 @@ body{
 }
         
 .topnav{  /*화면메뉴상태*/
-    height: 0%;
-    width: 100%;
+    height: 100%;
+    width: 0%;
     position: fixed;
     z-index: 1;
     top: 0;

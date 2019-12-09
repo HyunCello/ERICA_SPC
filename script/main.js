@@ -1,8 +1,8 @@
 function openNav(){  /*style의 크기를 30%로 변경*/
-    document.getElementById("myTopnav").style.height = "30%";
+    document.getElementById("myTopnav").style.width = "20%";
 }
 function closeNav(){ /*style의 크기를 0으로 변경*/
-    document.getElementById("myTopnav").style.height = "0";
+    document.getElementById("myTopnav").style.width = "0";
 }
 
 function readTextFileAlert(file) {
@@ -38,5 +38,7 @@ function readTextFile(file) {
     };
     rawFile.send(null);
 }
+
+
 
 
