@@ -126,9 +126,12 @@ line-height:30px;
 
 #maincontents
 {
+  float:left;
   width: 150px;
   height: 250px;
   background-color: #535353;
+  margin-left:30px;
+
 }
 
 a
