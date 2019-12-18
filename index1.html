@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,67 +10,70 @@
     ERICA_SPC
   </title>
 </head>
-  <body>
-    <div id="page">
-      <div id="header">
-      	<div id="headerTitle">
-          SPC: 정치공약 모음
-        </div>
-        <div id="headerSubText">
-          정치 공약들을 정리해서 보여드립니다.
-        </div>
+
+<body>
+  <div id="page">
+    <div id="header">
+      <div id="headerTitle">
+        SPC: 정치공약 모음
       </div>
-      <div id="bar"> <!--메뉴-->
-          <a href="home.html">
-            홈
-          </a>
-        	<a href="index1.html">
-            인물별 분류
-          </a>
-          <a href="index2.html">
-            정당별 분류
-          </a>
+      <div id="headerSubText">
+        정치 공약들을 정리해서 보여드립니다.
       </div>
-      <div class="contentTitle">
-        <h1>
-          인물별 모음
-        </h1>
-      </div>
-          <section>
-              <div id = "maincontents"><button onclick="readTextFileAlert('/crawling/crawlled/제19대대통령후보.txt')">Click me!</button>
-                  <p>
-                    정세균
-                  </p>
-              </div>
-              <div id = "maincontents">
-                  <p>
-                    홍익표
-                  </p>
-              </div>
-              <div id = "maincontents">
-                  <p>
-                    지상욱
-                  </p>
-              </div>
-              <div id = "maincontents">
-                  <p>
-                    진영
-                  </p>
-              </div>
-              <div id = "maincontents">
-                  <p>
-                    전혜숙
-                  </p>
-              </div>
-              <div id = "maincontents">
-                  <p>
-                    추미애
-                  </p>
-              </div>
-          </section>
     </div>
-    <div id="footer">
-      만든이: 김현수, 김유현
+    <nav>
+      <!--메뉴-->
+      <a href="home.html">
+        홈
+      </a>
+      <a href="index1.html">
+        인물별 분류
+      </a>
+      <a href="index2.html">
+        정당별 분류
+      </a>
+    </nav>
+    <div class="contentTitle">
+      <h1>
+        인물별 모음
+      </h1>
     </div>
-  </body>
+    <section>
+      <div id="maincontents"><button onclick="readTextFileAlert('/crawling/crawlled/제19대대통령후보.txt')">Click me!</button>
+        <p>
+          정세균
+        </p>
+      </div>
+      <div class="maincontents">
+        <p>
+          홍익표
+        </p>
+      </div>
+      <div class="maincontents">
+        <p>
+          지상욱
+        </p>
+      </div>
+      <div class="maincontents">
+        <p>
+          진영
+        </p>
+      </div>
+      <div class="maincontents">
+        <p>
+          전혜숙
+        </p>
+      </div>
+      <div class="maincontents">
+        <p>
+          추미애
+        </p>
+      </div>
+    </section>
+  </div>
+  <div id="footer">
+    만든이: 김현수, 김유현
+  </div>
+</body>
+
 </html>

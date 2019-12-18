@@ -34,15 +34,17 @@ body
     position: relative; 
     overflow: hidden; 
     background: #283823 url(background.png) repeat-y;
-    width: 738px;
+    background-size: 100%;
+    width: 90%;
 }
 
 #header
 {
   background-image:url(header.png);
   background-repeat:no-repeat;
+  background-size: 100%;
   height:111px;
-  width:738px;
+  width:100%;
 }
 
 #headerTitle
@@ -69,18 +71,17 @@ body
   font-family:Arial, Helvetica, sans-serif;
 }
 
-#bar
+nav
 {
   background-image:url(bar.png);
   background-repeat:no-repeat;
+  background-size: 100%;
   height:55px;
-  width:750px;
+  width:100%;
   line-height:55px;
-  padding-left:20px;
-  padding-right:20px;
 }
 
-#bar a
+nav a
 {
   font-size:13px;
   font-weight:bold;
@@ -89,20 +90,19 @@ body
   margin-right:28px;
 }
 
-#bar a:hover
+nav a:hover
 {
   color:#C7E0C2;
 }
 
 .contentTitle
 {
-width:676px;
+width:90%;
 height:37px;
 margin-top:20px;
-margin-left:25px;
-margin-right:25px;
 background-image:url(tab_back.png);
 background-repeat:no-repeat;
+background-size: 100%;
 }
 
 .contentTitle h1
@@ -116,7 +116,7 @@ background-repeat:no-repeat;
 
 .contentText
 {
-width:680px;
+width:90%;
 padding-left:30px;
 padding-right:30px;
 font-size:13px;
@@ -124,7 +124,12 @@ color:#030712;
 line-height:30px;
 }
 
-#maincontents
+section{
+  width: 90%;
+  height:50%;
+}
+
+.maincontents
 {
   float:left;
   width: 150px;
@@ -147,9 +152,10 @@ a:hover
 
 
 #footer {
-  width: 738px;
+  width: 90%;
   height:100px;
   background: url(footer.png) no-repeat;
+  background-size: 100%;
   text-align:center;
   font-size:15px;
   color:#535353;
