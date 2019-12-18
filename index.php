@@ -54,7 +54,7 @@
             <section>
                 <div><button onclick="readTextFileAlert('/crawling/crawlled/제19대대통령후보.txt')">Click me!</button>
                     <p>
-                    정세균<span><script>readTextFile('/crawling/crawlled/제19대대통령후보.txt')</script> </span>
+                    정세균<span><script>readTextFile('/crawling/crawlled/제19대대통령후보.m3u')</script> </span>
                         section
                     </p>
                 </div>
