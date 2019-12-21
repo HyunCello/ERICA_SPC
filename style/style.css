@@ -28,14 +28,12 @@ body
 #page
 {
     margin: 0 auto 0 auto; 
-    margin-top:25px;
     display: block; 
     height:auto;
     position: relative; 
     overflow: hidden; 
     background: #283823 url(background.png) repeat-y;
     background-size: 100%;
-    width: 90%;
 }
 
 #header
@@ -86,7 +84,7 @@ nav a
   font-size:13px;
   font-weight:bold;
   color:#FBFDFB;
-  margin-left:28px;
+  margin-left:4%;
   margin-right:28px;
 }
 
@@ -111,7 +109,7 @@ background-size: 100%;
   padding-top:8px;
   font-size:17px;
   font-weight:bold;
-  color:#BED2B7;
+  color:#030712;
 }
 
 .contentText
@@ -136,7 +134,7 @@ section{
   height: 250px;
   background-color: #535353;
   margin-left:30px;
-
+  margin-bottom: 30px;
 }
 
 a
@@ -152,12 +150,11 @@ a:hover
 
 
 #footer {
-  width: 90%;
   height:100px;
   background: url(footer.png) no-repeat;
   background-size: 100%;
   text-align:center;
   font-size:15px;
   color:#535353;
-  padding-top:38px;
+  padding-top: 1%;
 }
