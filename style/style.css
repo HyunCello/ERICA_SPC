@@ -104,6 +104,12 @@ background-repeat:no-repeat;
 background-size: 100%;
 }
 
+.pic
+{
+  height: 180px;
+  width: 180px;
+}
+
 .contentTitle h1
 {
   margin-left:21px;
@@ -131,6 +137,7 @@ section{
 .maincontents
 {
   float:left;
+<<<<<<< HEAD
   width: 400px;
   height: 250px;
   background-color: #535353;
@@ -142,6 +149,14 @@ section{
   margin-left:20px;
   margin-top:10px;
   font-size:20px;
+=======
+  width: 180px;
+  height: 180px;
+  background-color: #999;
+  margin-left:30px;
+  margin-bottom: 30px;
+  margin-top: 30px;
+>>>>>>> 5f44c0afa37f7eb69695f1616540b5605f7f486a
 }
 
 
