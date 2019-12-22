@@ -137,6 +137,10 @@ section{
 .maincontents
 {
   float:left;
+  width: 180px;
+  height: 180px;
+  color: #000000;
+  font-size: 20px;
   width: auto;
   height: auto;
   background-color: #999;
