@@ -103,6 +103,12 @@ background-repeat:no-repeat;
 background-size: 100%;
 }
 
+.pic
+{
+  height: 180px;
+  width: 180px;
+}
+
 .contentTitle h1
 {
   margin-left:21px;
@@ -130,11 +136,12 @@ section{
 .maincontents
 {
   float:left;
-  width: 150px;
-  height: 250px;
-  background-color: #535353;
+  width: 180px;
+  height: 180px;
+  background-color: #999;
   margin-left:30px;
   margin-bottom: 30px;
+  margin-top: 30px;
 }
 
 a
