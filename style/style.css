@@ -138,6 +138,8 @@ section{
   float:left;
   width: 180px;
   height: 180px;
+  color: #000000;
+  font-size: 20px;
   background-color: #999;
   margin-left:30px;
   margin-bottom: 30px;
