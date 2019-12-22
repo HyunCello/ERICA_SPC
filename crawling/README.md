@@ -44,3 +44,39 @@ https://wikidocs.net/book/1
 3. 웹페이지에서 불러오기
 
 의 순서로 진행을 하기로 계획했다.
+
+## 기본적인 크롤링 방법
+
+```
+sudo pip install requests beautifulsoap4
+```
+두 가지를 설치해 준다.
+
+두 가지의 용도는
+requests 패키지 안의 urlopen이라는 함수를 사용하여 주소로부터 웹페이지를 가져오고,
+
+그것을 Beautifulsoap 객채로 변환을 시키는 것에 있다고 한다.
+
+현재 코드는 example.py에 구성되어 있다.
+
+BeautifulSoup 객체는 웹문서를 파싱한 상태이다. 
+
+웹 문서가 태그 별로 분해되어 태그로 구성된 트리가 구성된다고 한다.
+
+포함하는 태그가 부모가 되고 포함된 태그가 자식이 되어 트리를 구성하고 있다고 한다.
+
+**파싱이란 일련의 문자열로 구성된 문서를 의미 있는 토큰(token)으로 분해하고  토큰으로 구성된 파스 트리(parse tree)를 만드는 것을 뜻한다고 한다** 
+
+
+```
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+
+html = urlopen("http://www.naver.com")  
+
+bsObject = BeautifulSoup(html, "html.parser") 
+
+
+print(bsObject) # 웹 문서 전체가 출력됩니다. 
+```
+
