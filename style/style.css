@@ -1,6 +1,7 @@
 html, body 
 {
   text-align: center;
+
 }
 
 p 
@@ -130,12 +131,19 @@ section{
 .maincontents
 {
   float:left;
-  width: 150px;
+  width: 400px;
   height: 250px;
   background-color: #535353;
   margin-left:30px;
   margin-bottom: 30px;
+  border-radius: 20px;
 }
+.maincontents p{
+  margin-left:20px;
+  margin-top:10px;
+  font-size:20px;
+}
+
 
 a
 {
